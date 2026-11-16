@@ -311,36 +311,82 @@
 
   /* Results */
   .results { text-align: center; padding: 8px 0 4px; }
-  .results .big-emoji {
-    font-size: 72px;
-    line-height: 1;
-    display: inline-block;
-    animation: float 2.4s ease-in-out infinite, popIn 0.6s cubic-bezier(.2, 1.6, .4, 1);
+  .mission-patch {
+    --patch-accent: #aebfe0;
+    --patch-glow: rgba(174, 191, 224, 0.25);
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: min(100%, 260px);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    border: 2px solid var(--patch-accent);
+    border-radius: 50%;
+    color: #fff;
+    background: radial-gradient(circle at 50% 30%, #293b60, #10182d 72%);
+    box-shadow: inset 0 0 0 5px #10182d, inset 0 0 0 6px var(--patch-accent), 0 8px 24px var(--patch-glow);
+    animation: patch-arrive 0.65s ease-out both;
+  }
+  .mission-patch.scout { --patch-accent: #b7c8e8; --patch-glow: rgba(130, 159, 209, 0.25); }
+  .mission-patch.traveler { --patch-accent: #80e2d4; --patch-glow: rgba(73, 193, 176, 0.3); }
+  .mission-patch.explorer { --patch-accent: #bcb3ff; --patch-glow: rgba(152, 135, 255, 0.3); }
+  .mission-patch.voyager { --patch-accent: #ffb59c; --patch-glow: rgba(255, 144, 117, 0.3); }
+  .mission-patch.commander {
+    --patch-accent: #ffdb77;
+    --patch-glow: rgba(238, 177, 42, 0.45);
+    background: radial-gradient(circle at 50% 30%, #584520, #1d1b2b 72%);
+  }
+  .patch-orbit {
+    position: absolute;
+    inset: 9%;
+    width: 82%;
+    height: 82%;
+    fill: none;
+    stroke: var(--patch-accent);
+    stroke-width: 1;
+    pointer-events: none;
+  }
+  .patch-orbit ellipse {
+    stroke-dasharray: 500;
+    animation: orbit-draw 0.75s ease-out both;
+  }
+  .patch-orbit .orbit-dots { stroke-dasharray: 2 5; opacity: 0.65; }
+  .patch-content {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    width: 75%;
+  }
+  .patch-label, .patch-tier {
+    color: var(--patch-accent);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .patch-insignia { color: var(--patch-accent); font-size: 16px; line-height: 1; letter-spacing: 0.12em; }
+  .results .big-emoji { font-size: 43px; line-height: 1; }
+  .patch-score {
+    display: grid;
+    place-items: center;
+    min-width: 74px;
+    padding: 2px 10px;
+    border: 1px solid var(--patch-accent);
+    border-radius: 999px;
+    background: #10182d;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
   }
   .results h2 { font-size: 20px; margin: 14px 0 4px; }
   .results .final { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
-  .ring {
-    --pct: 0;
-    width: 120px; height: 120px;
-    margin: 0 auto 6px;
-    border-radius: 50%;
-    background: conic-gradient(var(--accent) calc(var(--pct) * 1%), var(--track) 0);
-    display: grid; place-items: center;
-    transition: --pct 1s;
-  }
-  .ring span {
-    width: 96px; height: 96px;
-    border-radius: 50%;
-    background: var(--card);
-    display: grid; place-items: center;
-    font-size: 22px; font-weight: 700;
-  }
   .summary {
-    display: flex; justify-content: center; gap: 4px; flex-wrap: wrap;
+    display: flex; justify-content: center; gap: 4px;
     margin: 14px 0 0;
   }
   .summary i {
-    width: 22px; height: 6px; border-radius: 3px;
+    flex: 0 1 22px; min-width: 0; height: 6px; border-radius: 3px;
     background: var(--bad);
   }
   .summary i.ok { background: var(--good); }
@@ -372,16 +418,17 @@
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+  @keyframes patch-arrive {
+    from { opacity: 0; transform: scale(0.94) rotate(-4deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
   }
-  @keyframes popIn {
-    0% { transform: scale(0); }
-    100% { transform: scale(1); }
+  @keyframes orbit-draw {
+    from { stroke-dashoffset: 500; }
+    to { stroke-dashoffset: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     #starfield::before, #starfield::after { animation: none; }
+    .mission-patch, .patch-orbit ellipse { animation: none; }
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
@@ -452,11 +499,11 @@
   ];
 
   const RESULTS = [
-    { min: 100, emoji: "🏆", title: "Mission Commander!", text: "A perfect score — NASA should be calling you." },
-    { min: 80,  emoji: "🚀", title: "Stellar work!", text: "You clearly know your way around the cosmos." },
-    { min: 60,  emoji: "🌟", title: "Nice orbit!", text: "Solid knowledge with room to explore further." },
-    { min: 40,  emoji: "🛸", title: "Getting there!", text: "You're out of the atmosphere — keep climbing." },
-    { min: 0,   emoji: "🌑", title: "Houston, we have a problem", text: "Time to brush up and launch again!" },
+    { min: 100, tier: "commander", insignia: "★ ★ ★ ★ ★", emoji: "🏆", title: "Mission Commander!", text: "A perfect score — NASA should be calling you." },
+    { min: 80,  tier: "voyager", insignia: "★ ★ ★ ★", emoji: "🚀", title: "Stellar work!", text: "You clearly know your way around the cosmos." },
+    { min: 60,  tier: "explorer", insignia: "★ ★ ★", emoji: "🌟", title: "Nice orbit!", text: "Solid knowledge with room to explore further." },
+    { min: 40,  tier: "traveler", insignia: "★ ★", emoji: "🛸", title: "Getting there!", text: "You're out of the atmosphere — keep climbing." },
+    { min: 0,   tier: "scout", insignia: "★", emoji: "🌑", title: "Houston, we have a problem", text: "Time to brush up and launch again!" },
   ];
 
   const $ = (id) => document.getElementById(id);
@@ -626,28 +673,27 @@
     const pct = Math.round((score / QUESTIONS.length) * 100);
     const r = RESULTS.find((x) => pct >= x.min);
     card.innerHTML = `
-      <div class="results fade-in">
-        <div class="big-emoji" aria-hidden="true">${r.emoji}</div>
+      <div class="results">
+        <div class="mission-patch ${r.tier}">
+          <svg class="patch-orbit" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="orbit-dots" cx="100" cy="100" r="95"></circle>
+            <ellipse cx="100" cy="100" rx="96" ry="70" transform="rotate(-35 100 100)"></ellipse>
+          </svg>
+          <div class="patch-content">
+            <span class="patch-label">Mission complete</span>
+            <span class="patch-insignia" aria-hidden="true">${r.insignia}</span>
+            <span class="big-emoji" aria-hidden="true">${r.emoji}</span>
+            <span class="patch-score" aria-label="${score} out of ${QUESTIONS.length}">${score}/${QUESTIONS.length}</span>
+            <span class="patch-tier">${r.tier}</span>
+          </div>
+        </div>
         <h2>${r.title}</h2>
         <p class="final">${r.text}</p>
-        <div class="ring" id="ring"><span>${score}/${QUESTIONS.length}</span></div>
-        <div class="summary" aria-label="Answer summary">
+        <div class="summary" role="img" aria-label="Answer summary: ${history.map((ok, i) => `question ${i + 1} ${ok ? "correct" : "wrong"}`).join(", ")}">
           ${history.map((ok, i) => `<i class="${ok ? "ok" : ""}" title="Q${i + 1}: ${ok ? "correct" : "wrong"}"></i>`).join("")}
         </div>
         <button class="btn" id="restart">Play again ↻</button>
       </div>`;
-    const ring = $("ring");
-    let p = 0;
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) ring.style.setProperty("--pct", pct);
-    else {
-      const step = () => {
-        p = Math.min(pct, p + 2);
-        ring.style.setProperty("--pct", p);
-        if (p < pct) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }
     $("restart").addEventListener("click", start);
     $("restart").focus({ preventScroll: true });
   }
