@@ -185,10 +185,42 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     font-size: 14px;
     color: var(--muted);
     margin-bottom: 10px;
   }
+  .difficulty-badge {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .difficulty-options {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .difficulty-options legend {
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .difficulty-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--option);
+    cursor: pointer;
+  }
+  .difficulty-option:has(input:checked) { border-color: var(--accent); background: var(--option-hover); }
+  .difficulty-option:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .difficulty-option input { accent-color: var(--accent); }
+  .difficulty-option span { display: grid; }
+  .difficulty-option small { color: var(--muted); font-size: 13px; }
+  .btn:disabled { cursor: not-allowed; opacity: 0.55; }
   .score {
     display: inline-flex;
     align-items: center;
@@ -468,6 +500,7 @@
     line-height: 1.2;
   }
   .results h2 { font-size: 20px; margin: 14px 0 4px; }
+  .difficulty-result { font-weight: 600; margin: 0 0 4px; }
   .results .final { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
   .summary {
     display: flex; justify-content: center; gap: 4px;
@@ -533,13 +566,14 @@
 <main>
   <header>
     <h1>🚀 Space Exploration Quiz</h1>
-    <p>10 questions about our journey to the stars</p>
+    <p>Choose your level and launch into 10 questions</p>
   </header>
 
   <section class="card" id="card" aria-live="polite">
     <div id="quiz">
       <div class="meta">
         <span id="counter">Question 1 of 10</span>
+        <span class="difficulty-badge" id="difficultyBadge"></span>
         <span class="score" id="score" aria-label="Score">⭐ <span id="scoreVal">0</span></span>
       </div>
       <div class="progress" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="progress">
@@ -547,16 +581,16 @@
           <span class="flight-rail"></span>
           <span class="flight-trail" id="progressTrail"></span>
           <span class="launch-pad"></span>
-          <span class="progress-waypoint" style="--step: 1">★</span>
-          <span class="progress-waypoint" style="--step: 2">★</span>
-          <span class="progress-waypoint" style="--step: 3">★</span>
-          <span class="progress-waypoint" style="--step: 4">★</span>
-          <span class="progress-waypoint" style="--step: 5">★</span>
-          <span class="progress-waypoint" style="--step: 6">★</span>
-          <span class="progress-waypoint" style="--step: 7">★</span>
-          <span class="progress-waypoint" style="--step: 8">★</span>
-          <span class="progress-waypoint" style="--step: 9">★</span>
-          <span class="progress-waypoint" style="--step: 10">★</span>
+          <span class="progress-waypoint" style="--step: 1" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 2" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 3" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 4" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 5" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 6" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 7" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 8" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 9" aria-hidden="true">★</span>
+          <span class="progress-waypoint" style="--step: 10" aria-hidden="true">★</span>
           <svg class="progress-rocket" id="progressRocket" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M14.4 3.2c2.8-1 5-.9 6.4-.7.2 1.4.3 3.6-.7 6.4l-5.8 7.4-5.5-1.8-1.8-5.5 7.4-5.8Z" fill="currentColor"/>
             <path d="m8.8 9-4.1.8-2.2 3.7 5.2-.5m7.5 2.8-.8 4.1-3.7 2.2.5-5.2" fill="currentColor"/>
@@ -574,38 +608,146 @@
 </main>
 
 <script>
-  const QUESTIONS = [
-    { emoji: "🔴", q: "Which planet is known as the Red Planet?",
-      options: ["Venus", "Mars", "Mercury", "Jupiter"], answer: 1,
-      fact: "Iron oxide (rust) in Martian soil gives Mars its reddish hue." },
-    { emoji: "👨‍🚀", q: "Who was the first person to walk on the Moon?",
-      options: ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "Michael Collins"], answer: 2,
-      fact: "Neil Armstrong stepped onto the lunar surface on July 20, 1969, during Apollo 11." },
-    { emoji: "🪐", q: "What is the largest planet in our solar system?",
-      options: ["Saturn", "Neptune", "Earth", "Jupiter"], answer: 3,
-      fact: "Jupiter is so big that more than 1,300 Earths could fit inside it." },
-    { emoji: "🛰️", q: "What was the first artificial satellite launched into orbit?",
-      options: ["Sputnik 1", "Explorer 1", "Vanguard 1", "Telstar"], answer: 0,
-      fact: "The Soviet Union launched Sputnik 1 on October 4, 1957." },
-    { emoji: "🌍", q: "Who was the first human to travel into space?",
-      options: ["Alan Shepard", "Yuri Gagarin", "John Glenn", "Valentina Tereshkova"], answer: 1,
-      fact: "Yuri Gagarin orbited Earth aboard Vostok 1 on April 12, 1961." },
-    { emoji: "🔭", q: "Which space telescope, launched in 2021, observes mainly in infrared?",
-      options: ["Hubble", "Kepler", "James Webb", "Spitzer"], answer: 2,
-      fact: "The James Webb Space Telescope orbits near the Sun–Earth L2 point, about 1.5 million km away." },
-    { emoji: "💍", q: "Which planet has the most prominent ring system?",
-      options: ["Uranus", "Saturn", "Neptune", "Jupiter"], answer: 1,
-      fact: "All four giant planets have rings, but Saturn's are by far the brightest and largest." },
-    { emoji: "🤖", q: "Which NASA rover landed in Mars's Jezero Crater in 2021?",
-      options: ["Curiosity", "Opportunity", "Spirit", "Perseverance"], answer: 3,
-      fact: "Perseverance also carried Ingenuity, the first helicopter to fly on another planet." },
-    { emoji: "📡", q: "Which spacecraft is the most distant human-made object?",
-      options: ["Voyager 1", "Pioneer 10", "New Horizons", "Voyager 2"], answer: 0,
-      fact: "Launched in 1977, Voyager 1 entered interstellar space in 2012." },
-    { emoji: "☀️", q: "About how long does sunlight take to reach Earth?",
-      options: ["8 seconds", "8 minutes", "8 hours", "8 days"], answer: 1,
-      fact: "Light covers the ~150 million km in roughly 8 minutes and 20 seconds." },
-  ];
+  const DIFFICULTIES = {
+    easy: {
+      name: "Artemis Cadet", level: "Easy",
+      description: "Recognizable planets, famous astronauts, and iconic missions",
+      questions: [
+        { emoji: "🔴", q: "Which planet is known as the Red Planet?",
+          options: ["Venus", "Mars", "Mercury", "Jupiter"], answer: 1,
+          fact: "Iron oxide (rust) in Martian soil gives Mars its reddish hue.",
+          source: "https://science.nasa.gov/mars/" },
+        { emoji: "👨‍🚀", q: "Who was the first person to walk on the Moon?",
+          options: ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "Michael Collins"], answer: 2,
+          fact: "Neil Armstrong stepped onto the lunar surface on July 20, 1969, during Apollo 11.",
+          source: "https://science.nasa.gov/mission/apollo-11/" },
+        { emoji: "🪐", q: "What is the largest planet in our solar system?",
+          options: ["Saturn", "Neptune", "Earth", "Jupiter"], answer: 3,
+          fact: "Jupiter is so big that more than 1,300 Earths could fit inside it.",
+          source: "https://science.nasa.gov/jupiter/" },
+        { emoji: "🛰️", q: "What was the first artificial satellite launched into orbit?",
+          options: ["Sputnik 1", "Explorer 1", "Vanguard 1", "Telstar"], answer: 0,
+          fact: "The Soviet Union launched Sputnik 1 on October 4, 1957.",
+          source: "https://www.nasa.gov/history/dawn-of-the-space-age/" },
+        { emoji: "🌍", q: "Who was the first human to travel into space?",
+          options: ["Alan Shepard", "Yuri Gagarin", "John Glenn", "Valentina Tereshkova"], answer: 1,
+          fact: "Yuri Gagarin orbited Earth aboard Vostok 1 on April 12, 1961.",
+          source: "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1961-012A" },
+        { emoji: "🔭", q: "Which space telescope, launched in 2021, observes mainly in infrared?",
+          options: ["Hubble", "Kepler", "James Webb", "Spitzer"], answer: 2,
+          fact: "The James Webb Space Telescope orbits near the Sun–Earth L2 point, about 1.5 million km away.",
+          source: "https://science.nasa.gov/mission/webb/" },
+        { emoji: "💍", q: "Which planet has the most prominent ring system?",
+          options: ["Uranus", "Saturn", "Neptune", "Jupiter"], answer: 1,
+          fact: "All four giant planets have rings, but Saturn's are by far the brightest and largest.",
+          source: "https://science.nasa.gov/saturn/" },
+        { emoji: "🤖", q: "Which NASA rover landed in Mars's Jezero Crater in 2021?",
+          options: ["Curiosity", "Opportunity", "Spirit", "Perseverance"], answer: 3,
+          fact: "Perseverance also carried Ingenuity, the first helicopter to fly on another planet.",
+          source: "https://science.nasa.gov/mission/mars-2020-perseverance/" },
+        { emoji: "📡", q: "Which spacecraft is the most distant human-made object?",
+          options: ["Voyager 1", "Pioneer 10", "New Horizons", "Voyager 2"], answer: 0,
+          fact: "Launched in 1977, Voyager 1 entered interstellar space in 2012.",
+          source: "https://science.nasa.gov/mission/voyager/" },
+        { emoji: "☀️", q: "About how long does sunlight take to reach Earth?",
+          options: ["8 seconds", "8 minutes", "8 hours", "8 days"], answer: 1,
+          fact: "Light covers the ~150 million km in roughly 8 minutes and 20 seconds.",
+          source: "https://spaceplace.nasa.gov/sunlight/" },
+      ],
+    },
+    intermediate: {
+      name: "Apollo Navigator", level: "Intermediate",
+      description: "Mission milestones, spacecraft, rovers, and space science",
+      questions: [
+        { emoji: "🧯", q: "What caused Apollo 13 to abandon its planned Moon landing?",
+          options: ["A failed parachute", "An oxygen tank explosion", "A stuck lunar module hatch", "A lost radio antenna"], answer: 1,
+          fact: "An oxygen tank rupture damaged the service module, forcing the crew to abort the landing.",
+          source: "https://www.nasa.gov/missions/apollo/apollo-13-mission-details/" },
+        { emoji: "🦅", q: "What was the name of Apollo 11's lunar module?",
+          options: ["Eagle", "Columbia", "Intrepid", "Odyssey"], answer: 0,
+          fact: "Eagle carried Neil Armstrong and Buzz Aldrin from lunar orbit to the Moon's surface.",
+          source: "https://science.nasa.gov/mission/apollo-11/" },
+        { emoji: "🛞", q: "In which Martian crater did NASA's Curiosity rover land?",
+          options: ["Jezero", "Endurance", "Gale", "Eagle"], answer: 2,
+          fact: "Curiosity landed in Gale Crater in 2012 to investigate whether Mars could once have supported microbial life.",
+          source: "https://science.nasa.gov/mission/msl-curiosity/" },
+        { emoji: "🌞", q: "What distinction did NASA's Parker Solar Probe achieve in 2021?",
+          options: ["First spacecraft to orbit the Sun", "First spacecraft to touch the Sun's corona", "First solar mission beyond Jupiter", "First probe to land on a sunspot"], answer: 1,
+          fact: "Parker became the first spacecraft to fly through the Sun's corona, its outer atmosphere.",
+          source: "https://science.nasa.gov/mission/parker-solar-probe/" },
+        { emoji: "🟠", q: "Which NASA spacecraft studies Jupiter from a looping polar orbit?",
+          options: ["Juno", "Galileo", "Cassini", "Europa Clipper"], answer: 0,
+          fact: "Juno's polar orbits help it study Jupiter's atmosphere, interior, and magnetic environment.",
+          source: "https://science.nasa.gov/mission/juno/" },
+        { emoji: "❄️", q: "Which spacecraft made the first close-up flyby of Pluto?",
+          options: ["Voyager 2", "Dawn", "New Horizons", "Pioneer 11"], answer: 2,
+          fact: "New Horizons flew past Pluto in July 2015, revealing mountains, plains, and a complex atmosphere.",
+          source: "https://science.nasa.gov/mission/new-horizons/" },
+        { emoji: "🔭", q: "Which space shuttle carried the Hubble Space Telescope into orbit?",
+          options: ["Endeavour", "Discovery", "Atlantis", "Challenger"], answer: 1,
+          fact: "Discovery carried Hubble to orbit in April 1990.",
+          source: "https://science.nasa.gov/mission/hubble/observatory/" },
+        { emoji: "🪨", q: "Which asteroid did NASA's OSIRIS-REx return a sample from?",
+          options: ["Eros", "Vesta", "Bennu", "Ryugu"], answer: 2,
+          fact: "OSIRIS-REx delivered its Bennu sample to Earth in 2023 for laboratory study.",
+          source: "https://science.nasa.gov/mission/osiris-rex/" },
+        { emoji: "🛞", q: "What was the name of the first wheeled vehicle operated on another planet?",
+          options: ["Sojourner", "Spirit", "Lunokhod 1", "Curiosity"], answer: 0,
+          fact: "Sojourner explored Mars after arriving with the Pathfinder lander in 1997.",
+          source: "https://science.nasa.gov/mission/mars-pathfinder/" },
+        { emoji: "🌕", q: "What was Apollo 8 the first crewed mission to do?",
+          options: ["Land on the Moon", "Orbit the Moon", "Dock two spacecraft in lunar orbit", "Spend a week on the Moon"], answer: 1,
+          fact: "Apollo 8's crew became the first humans to travel to and orbit the Moon in December 1968.",
+          source: "https://science.nasa.gov/mission/apollo-8/" },
+      ],
+    },
+    hard: {
+      name: "Voyager Commander", level: "Hard",
+      description: "Mission instruments, orbital concepts, and lesser-known achievements",
+      questions: [
+        { emoji: "🛰️", q: "Which orbit lets a spacecraft map successive strips as a planet rotates beneath it?",
+          options: ["Equatorial orbit", "Polar orbit", "Geostationary orbit", "Halo orbit"], answer: 1,
+          fact: "A near-polar orbit let Magellan map Venus in successive swaths as the planet rotated.",
+          source: "https://science.nasa.gov/learn/basics-of-space-flight/chapter5-1/" },
+        { emoji: "🧪", q: "Which Cassini instrument detected hydrogen in Enceladus's plume?",
+          options: ["RADAR", "VIMS", "INMS", "ISS"], answer: 2,
+          fact: "Cassini's Ion and Neutral Mass Spectrometer sampled the plume gases and found molecular hydrogen.",
+          source: "https://science.nasa.gov/resource/enceladus-hydrothermal-activity/" },
+        { emoji: "🪨", q: "Lucy's mission explores two asteroid swarms that share an orbit with which planet?",
+          options: ["Mars", "Saturn", "Jupiter", "Neptune"], answer: 2,
+          fact: "Jupiter's Trojan asteroids cluster near two stable points, one ahead of and one behind the planet.",
+          source: "https://www.nasa.gov/missions/how-were-the-trojan-asteroids-discovered-and-named/" },
+        { emoji: "🌡️", q: "What does Curiosity's SAM instrument suite analyze in Martian rock samples?",
+          options: ["Magnetic fields", "Gases released by heating samples", "Seismic waves", "Reflected radio signals"], answer: 1,
+          fact: "SAM heats powdered samples and analyzes released gases to study Martian chemistry.",
+          source: "https://science.gsfc.nasa.gov/699/projects/347/" },
+        { emoji: "📏", q: "What does the Lunar Reconnaissance Orbiter's LOLA instrument measure?",
+          options: ["Lunar surface elevation with laser pulses", "Moonquakes with seismometers", "Water vapor with radar", "Lunar gravity with radio waves"], answer: 0,
+          fact: "LOLA is a laser altimeter that measures lunar topography.",
+          source: "https://science.nasa.gov/mission/lro/" },
+        { emoji: "⚡", q: "Which propulsion system helped NASA's Dawn spacecraft orbit both Vesta and Ceres?",
+          options: ["Solar sail", "Ion propulsion", "Nuclear thermal propulsion", "Balloon aerobraking"], answer: 1,
+          fact: "Dawn used efficient ion engines to travel between and orbit two different main-belt worlds.",
+          source: "https://science.nasa.gov/mission/dawn/technology/ion-propulsion/" },
+        { emoji: "☀️", q: "At which region does the SOHO spacecraft orbit to keep a continuous view of the Sun?",
+          options: ["Sun–Earth L1", "Sun–Earth L2", "Earth–Moon L4", "Earth's geostationary orbit"], answer: 0,
+          fact: "SOHO operates around the Sun–Earth L1 region, about 1.5 million km sunward of Earth.",
+          source: "https://science.nasa.gov/mission/soho/" },
+        { emoji: "🪂", q: "Where did ESA's Huygens probe make its historic landing in 2005?",
+          options: ["Europa", "Titan", "Triton", "Ganymede"], answer: 1,
+          fact: "Huygens descended through Titan's atmosphere and became the first probe to land on that distant moon.",
+          source: "https://science.nasa.gov/mission/cassini/" },
+        { emoji: "💥", q: "Which comet did NASA's Deep Impact mission strike with a spacecraft impactor?",
+          options: ["Halley", "Tempel 1", "67P/Churyumov–Gerasimenko", "Wild 2"], answer: 1,
+          fact: "The impact exposed material beneath Tempel 1's surface for study.",
+          source: "https://science.nasa.gov/mission/deep-impact-epoxi/" },
+        { emoji: "🔵", q: "Which two planets have only been visited up close by Voyager 2?",
+          options: ["Mercury and Venus", "Uranus and Neptune", "Mars and Jupiter", "Saturn and Pluto"], answer: 1,
+          fact: "Voyager 2 remains the only spacecraft to have flown by Uranus and Neptune.",
+          source: "https://science.nasa.gov/mission/voyager/" },
+      ],
+    },
+  };
 
   const RESULTS = [
     { min: 100, tier: "commander", insignia: "★ ★ ★ ★ ★", emoji: "🏆", title: "Mission Commander!", text: "A perfect score — NASA should be calling you." },
@@ -670,10 +812,48 @@
   const quizHTML = $("quiz").outerHTML;
 
   const AUTO_ADVANCE_MS = 5000;
-  let index, score, answered, history, timerFrame;
+  let index, score, answered, history, timerFrame, selectedLevel, activeQuestions;
 
-  function start() {
+  function showDifficulty() {
+    cancelAnimationFrame(timerFrame);
+    card.innerHTML = `
+      <div id="difficulty-selection">
+        <h2 id="difficulty-heading" class="question">Choose your difficulty</h2>
+        <form id="difficulty-form">
+          <fieldset class="difficulty-options">
+            <legend>Select one launch level</legend>
+            ${Object.entries(DIFFICULTIES).map(([key, difficulty]) => `
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="${key}"${selectedLevel === key ? " checked" : ""}>
+                <span><strong>${difficulty.name}</strong><small>${difficulty.level} · ${difficulty.description}</small></span>
+              </label>`).join("")}
+          </fieldset>
+          <button class="btn" id="launch" type="submit"${selectedLevel ? "" : " disabled"}>Launch quiz 🚀</button>
+        </form>
+      </div>`;
+    const form = $("difficulty-form");
+    form.addEventListener("change", (event) => {
+      if (event.target.name === "difficulty") {
+        selectedLevel = event.target.value;
+        $("launch").disabled = false;
+      }
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const choice = form.querySelector('input[name="difficulty"]:checked');
+      if (choice) start(choice.value);
+    });
+    const choice = form.querySelector('input[name="difficulty"]:checked');
+    (choice || form.querySelector('input[name="difficulty"]')).focus({ preventScroll: true });
+  }
+
+  function start(level = selectedLevel) {
+    if (!DIFFICULTIES[level]) return;
+    cancelAnimationFrame(timerFrame);
+    selectedLevel = level;
+    activeQuestions = DIFFICULTIES[selectedLevel].questions;
     card.innerHTML = quizHTML;
+    $("difficultyBadge").textContent = `${DIFFICULTIES[selectedLevel].name} · ${DIFFICULTIES[selectedLevel].level}`;
     index = 0; score = 0; history = [];
     setCosmos(0);
     $("next").addEventListener("click", next);
@@ -681,9 +861,9 @@
   }
 
   function render() {
-    const item = QUESTIONS[index];
+    const item = activeQuestions[index];
     answered = false;
-    $("counter").textContent = `Question ${index + 1} of ${QUESTIONS.length}`;
+    $("counter").textContent = `Question ${index + 1} of ${activeQuestions.length}`;
     $("scoreVal").textContent = score;
     setProgress(index);
 
@@ -714,7 +894,7 @@
   }
 
   function setProgress(done) {
-    const pct = (done / QUESTIONS.length) * 100;
+    const pct = (done / activeQuestions.length) * 100;
     const progress = $("progress");
     progress.classList.remove("is-moving");
     $("progressTrail").style.width = pct + "%";
@@ -728,7 +908,7 @@
   function choose(i) {
     if (answered) return;
     answered = true;
-    const item = QUESTIONS[index];
+    const item = activeQuestions[index];
     const buttons = [...$("options").children];
     const correct = i === item.answer;
     history.push(correct);
@@ -742,7 +922,7 @@
 
     if (correct) {
       score++;
-      setCosmos(score / QUESTIONS.length);
+      setCosmos(score / activeQuestions.length);
       $("scoreVal").textContent = score;
       const s = $("score");
       s.classList.remove("bump"); void s.offsetWidth; s.classList.add("bump");
@@ -761,7 +941,7 @@
     }
     const nb = $("next");
     nb.innerHTML = `<span class="timer-fill" aria-hidden="true"></span><span class="label"></span><span class="countdown" aria-hidden="true"></span>`;
-    nb.querySelector(".label").textContent = index === QUESTIONS.length - 1 ? "See results 🎉" : "Next question →";
+    nb.querySelector(".label").textContent = index === activeQuestions.length - 1 ? "See results 🎉" : "Next question →";
     nb.hidden = false;
     nb.focus({ preventScroll: true });
     startTimer(nb);
@@ -786,12 +966,13 @@
     if (!answered) return;
     cancelAnimationFrame(timerFrame);
     index++;
-    if (index < QUESTIONS.length) render();
+    if (index < activeQuestions.length) render();
     else showResults();
   }
 
   function showResults() {
-    const pct = Math.round((score / QUESTIONS.length) * 100);
+    const difficulty = DIFFICULTIES[selectedLevel];
+    const pct = Math.round((score / activeQuestions.length) * 100);
     const r = RESULTS.find((x) => pct >= x.min);
     card.innerHTML = `
       <div class="results">
@@ -804,18 +985,21 @@
             <span class="patch-label">Mission complete</span>
             <span class="patch-insignia" aria-hidden="true">${r.insignia}</span>
             <span class="big-emoji" aria-hidden="true">${r.emoji}</span>
-            <span class="patch-score" aria-label="${score} out of ${QUESTIONS.length}">${score}/${QUESTIONS.length}</span>
+            <span class="patch-score" aria-label="${score} out of ${activeQuestions.length}">${score}/${activeQuestions.length}</span>
             <span class="patch-tier">${r.tier}</span>
           </div>
         </div>
         <h2>${r.title}</h2>
+        <p class="difficulty-result">${difficulty.name} · ${difficulty.level}</p>
         <p class="final">${r.text}</p>
         <div class="summary" role="img" aria-label="Answer summary: ${history.map((ok, i) => `question ${i + 1} ${ok ? "correct" : "wrong"}`).join(", ")}">
           ${history.map((ok, i) => `<i class="${ok ? "ok" : ""}" title="Q${i + 1}: ${ok ? "correct" : "wrong"}"></i>`).join("")}
         </div>
-        <button class="btn" id="restart">Play again ↻</button>
+        <button class="btn" id="restart">Play ${difficulty.name} again ↻</button>
+        <button class="btn" id="chooseDifficulty">Choose another level</button>
       </div>`;
-    $("restart").addEventListener("click", start);
+    $("restart").addEventListener("click", () => start());
+    $("chooseDifficulty").addEventListener("click", showDifficulty);
     $("restart").focus({ preventScroll: true });
   }
 
@@ -826,7 +1010,7 @@
     else if (answered && e.key === "Enter" && document.activeElement !== $("next")) next();
   });
 
-  start();
+  showDifficulty();
   requestAnimationFrame(renderCosmos);
 </script>
 </body>
