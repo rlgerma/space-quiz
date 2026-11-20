@@ -15,7 +15,7 @@
     --bg-accent: radial-gradient(circle at 20% 0%, #e3e6ff 0%, transparent 55%), radial-gradient(circle at 100% 100%, #ffe6f3 0%, transparent 50%);
     --card: #ffffff;
     --text: #1c1e2b;
-    --muted: #646a82;
+    --muted: #51576e;
     --border: #e1e4ef;
     --option: #f7f8fc;
     --option-hover: #eef0fb;
@@ -23,8 +23,14 @@
     --accent-2: #b14cf0;
     --good: #16a34a;
     --good-bg: #dcfce7;
+    --good-text: #17632f;
+    --good-key-text: #102a18;
     --bad: #dc2626;
     --bad-bg: #fee2e2;
+    --bad-text: #a51d27;
+    --bad-key-text: #fff;
+    --glass: rgba(247, 248, 255, 0.92);
+    --glass-blurred: rgba(247, 248, 255, 0.87);
     --track: #e6e8f2;
     --shadow: 0 10px 30px rgba(30, 35, 90, 0.08), 0 2px 6px rgba(30, 35, 90, 0.05);
   }
@@ -38,16 +44,22 @@
       --bg-accent: radial-gradient(circle at 20% 0%, #1d1f4a 0%, transparent 55%), radial-gradient(circle at 100% 100%, #2c1438 0%, transparent 50%);
       --card: #151829;
       --text: #e8eaf6;
-      --muted: #9aa0bd;
+      --muted: #b6bdd5;
       --border: #262a44;
       --option: #1b1f35;
       --option-hover: #23284a;
       --accent: #8b8bff;
       --accent-2: #d17bff;
       --good: #4ade80;
-      --good-bg: rgba(34, 197, 94, 0.16);
+      --good-bg: #183c2b;
+      --good-text: #86efac;
+      --good-key-text: #102a18;
       --bad: #f87171;
-      --bad-bg: rgba(239, 68, 68, 0.16);
+      --bad-bg: #49262f;
+      --bad-text: #fda4af;
+      --bad-key-text: #321318;
+      --glass: rgba(21, 24, 41, 0.94);
+      --glass-blurred: rgba(21, 24, 41, 0.90);
       --track: #252a45;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     }
@@ -153,11 +165,20 @@
   header p { margin: 0; color: var(--muted); font-size: 14px; }
 
   .card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    --rim: #916cff;
+    background: var(--glass);
+    border: 1px solid #916cff;
+    border-color: var(--rim);
     border-radius: 16px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow), 0 0 24px -8px var(--rim), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     padding: 22px;
+  }
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .card {
+      background: var(--glass-blurred);
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+    }
   }
 
   .meta {
@@ -306,14 +327,14 @@
     border-color: var(--good);
     animation: pop 0.45s ease;
   }
-  .option.correct .key { background: var(--good); border-color: var(--good); color: #fff; }
+  .option.correct .key { background: var(--good); border-color: var(--good); color: var(--good-key-text); }
   .option.wrong {
     background: var(--bad-bg);
     border-color: var(--bad);
     animation: shake 0.45s ease;
   }
-  .option.wrong .key { background: var(--bad); border-color: var(--bad); color: #fff; }
-  .option.dim { opacity: 0.55; }
+  .option.wrong .key { background: var(--bad); border-color: var(--bad); color: var(--bad-key-text); }
+  .option.dim { border-color: transparent; }
 
   .feedback {
     margin-top: 16px;
@@ -327,8 +348,8 @@
   .feedback.good { background: var(--good-bg); color: var(--text); border-left: 4px solid var(--good); }
   .feedback.bad { background: var(--bad-bg); color: var(--text); border-left: 4px solid var(--bad); }
   .feedback strong { display: block; margin-bottom: 2px; }
-  .feedback.good strong { color: var(--good); }
-  .feedback.bad strong { color: var(--bad); }
+  .feedback.good strong { color: var(--good-text); }
+  .feedback.bad strong { color: var(--bad-text); }
 
   .btn {
     font: inherit;
@@ -340,7 +361,7 @@
     border: 0;
     border-radius: 12px;
     color: #fff;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    background: linear-gradient(90deg, #4034a0, #762b91);
     cursor: pointer;
     transition: filter 0.15s, transform 0.1s;
   }
@@ -359,7 +380,7 @@
   #next .timer-fill {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.16);
     transform-origin: left center;
     transform: scaleX(0);
     pointer-events: none;
@@ -626,6 +647,7 @@
 
     starfield.style.setProperty("--intensity", L.toFixed(4));
     nebula.style.setProperty("--level", Math.pow(L, 0.85).toFixed(4));
+    card.style.setProperty("--rim", `rgb(${Math.round(145 + 110 * L)}, ${Math.round(108 + 82 * L)}, ${Math.round(255 - 160 * L)})`);
     blobs.forEach((b, i) => {
       const p = BLOB_PATHS[i];
       const x = p.ox + p.ax * Math.sin(t * p.fx + p.p);
